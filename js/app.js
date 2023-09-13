@@ -1,4 +1,6 @@
 $(document).ready(function() {
+  // Navegação de tabs
+
   $('[data-grupo]').each(function() {
     const $tabs = $(this).find('[data-tab]'),
           $conteudos = $(this).find('[data-conteudo]'),
@@ -68,6 +70,35 @@ $(document).ready(function() {
     $(this).toggleClass('ativo');
     $('[data-mobile="menu"]').toggleClass('ativo')
   })
+
+  // Slide
+
+  function slide(nomeSlide, velocidade) {
+    const seletorSlide = nomeSlide,
+          classeAtivo = 'ativo';
+    let rotacao = setInterval(rodaSlide, velocidade);
+    
+    $(`${seletorSlide} > :first`).addClass(classeAtivo);
+
+    $(seletorSlide).hover(function() {
+      clearInterval(rotacao);
+    }, function() {
+      rotacao = setInterval(rodaSlide, velocidade);
+    });
+  
+    function rodaSlide() {
+      const slideAtivo = $(`${seletorSlide} > .${classeAtivo}`);
+      let proximoSlide = slideAtivo.next();
+  
+      if(proximoSlide.length === 0) {
+        proximoSlide = $(`${seletorSlide} > :first`);
+      }
+  
+      slideAtivo.removeClass(classeAtivo);
+      proximoSlide.addClass(classeAtivo);
+    }
+  }
+  slide('[data-slide="1"]', 3000);
 
 });
 
