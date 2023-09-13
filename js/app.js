@@ -55,12 +55,19 @@ $(document).ready(function() {
 
     $(window).scroll(function() {
       const windowTop = $(window).scrollTop();
-      if(distanciaSecao - $tamanhoMenu < windowTop) {
+      if(distanciaSecao - $tamanhoMenu - 10 < windowTop) {
         $navs.removeClass('ativo')
         $nav.addClass('ativo');
       }
     })
   });
+
+  // Menu mobile
+
+  $('[data-mobile="btn"]').click(function() {
+    $(this).toggleClass('ativo');
+    $('[data-mobile="menu"]').toggleClass('ativo')
+  })
 
 });
 
