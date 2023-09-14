@@ -1,3 +1,18 @@
+debounce = function(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
 $(document).ready(function() {
   // Navegação de tabs
 
@@ -49,19 +64,19 @@ $(document).ready(function() {
 
   $('[data-grupo]').each(function() {
     const alturaSecao = $(this).innerHeight(),
-          distanciaSecao = $(this).offset().top,
+          $distanciaSecao = $(this).offset().top,
           $navs = $('[data-menu]').find('[data-nav]'),
           $id = $(this).data('grupo'),
           $nav = $(`[data-nav="${$id}"]`),
           $tamanhoMenu = $('[data-menu="nav"]').innerHeight();
 
-    $(window).scroll(function() {
+    $(window).scroll(debounce(function() {
       const windowTop = $(window).scrollTop();
-      if(distanciaSecao - $tamanhoMenu - 10 < windowTop) {
+      if($distanciaSecao - $tamanhoMenu - 10 < windowTop) {
         $navs.removeClass('ativo')
         $nav.addClass('ativo');
       }
-    })
+    }, 100));
   });
 
   // Menu mobile
@@ -73,32 +88,59 @@ $(document).ready(function() {
 
   // Slide
 
-  function slide(nomeSlide, velocidade) {
-    const seletorSlide = nomeSlide,
-          classeAtivo = 'ativo';
-    let rotacao = setInterval(rodaSlide, velocidade);
-    
-    $(`${seletorSlide} > :first`).addClass(classeAtivo);
+function slide(nomeSlide, velocidade) {
+  const seletorSlide = nomeSlide,
+        classeAtivo = 'ativo';
+  let rotacao = setInterval(rodaSlide, velocidade);
+  
+  $(`${seletorSlide} > :first`).addClass(classeAtivo);
 
-    $(seletorSlide).hover(function() {
-      clearInterval(rotacao);
-    }, function() {
-      rotacao = setInterval(rodaSlide, velocidade);
-    });
-  
-    function rodaSlide() {
-      const slideAtivo = $(`${seletorSlide} > .${classeAtivo}`);
-      let proximoSlide = slideAtivo.next();
-  
-      if(proximoSlide.length === 0) {
-        proximoSlide = $(`${seletorSlide} > :first`);
-      }
-  
-      slideAtivo.removeClass(classeAtivo);
-      proximoSlide.addClass(classeAtivo);
+  $(seletorSlide).hover(function() {
+    clearInterval(rotacao);
+  }, function() {
+    rotacao = setInterval(rodaSlide, velocidade);
+  });
+
+  function rodaSlide() {
+    const slideAtivo = $(`${seletorSlide} > .${classeAtivo}`);
+    let proximoSlide = slideAtivo.next();
+
+    if(proximoSlide.length === 0) {
+      proximoSlide = $(`${seletorSlide} > :first`);
     }
-  }
-  slide('[data-slide="1"]', 3000);
 
+    slideAtivo.removeClass(classeAtivo);
+    proximoSlide.addClass(classeAtivo);
+  }
+}
+slide('[data-slide="1"]', 3000);
+
+
+  // Animação ao scroll
+
+  (function() {
+    const $alvo = $('[data-animacao="scroll"]'),
+          classeAnimacao = 'animacao-scroll',
+          $tamanhoJanela = $(window).height() * 4/5;
+  
+    function animaScroll() {
+      const $distanciaBarraTop = $(window).scrollTop();
+
+      $alvo.each(function() {
+        const $distanciaItemTop = $(this).offset().top;
+  
+        if($distanciaBarraTop > $distanciaItemTop - $tamanhoJanela) {
+          $(this).addClass(classeAnimacao);
+        } else {
+          $(this).removeClass(classeAnimacao);
+        }
+      });
+    }
+    animaScroll();
+  
+    $(document).scroll(debounce(function() {
+      animaScroll();
+    }, 80));
+  })();
 });
 
